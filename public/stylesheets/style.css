@@ -1,0 +1,106 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  height: 100vh; /* Ensures the body takes the full height of the browser window */
+  color: #fff;
+  background-image: url("../images/word press vulnerabilty.webp"); /* Make sure the path is correct */
+  background-size: cover; /* Covers the entire page */
+  background-position: center; /* Center the background image */
+  background-repeat: no-repeat; /* No repeating the background image */
+  background-attachment: fixed; /* Optional, fixes the background during scrolling */
+}
+
+.top-banner {
+  background-color: #020f1d; /* Color for your top-banner */
+  height: 50px; /* Adjust height as necessary */
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+img[alt="Logo"] {
+  position: absolute;
+  top: 5px; /* Adjust to overlap the top banner */
+  left: 10px;
+  width: 100px; /* Adjust for visibility */
+  z-index: 1001; /* Higher than the top-banner's z-index to overlap it */
+}
+
+
+.main {
+  display: flex;
+  justify-content: center; /* Centre les éléments horizontalement */
+  align-items: center; /* Centre les éléments verticalement */
+  height: 100vh; /* Prend la hauteur totale de la vue */
+  text-align: center; /* Centre le texte dans tous les sous-éléments */
+  flex-direction: column; /* Organise les enfants en colonne */
+}
+
+
+.url-description {
+  color: #ffffff; /* Maintains white text for readability */
+  font-size: 18px; /* Slightly larger font size for better visibility */
+  margin-bottom: 15px; /* More space between descriptions and input field */
+}
+
+#urlInput, #verifyButton {
+  width: 100%; /* Full width for more prominence */
+}
+
+
+
+#urlInput {
+  width: 100%;
+  padding-right: 15px;
+  border: 2px solid #020f1d;
+  box-sizing: border-box;
+}
+
+.form-control, .btn {
+  border-radius: 0.25rem;
+}
+
+.categories .card {
+  background-color: #020f1d;
+  color: #f6f5f5;
+  padding: 20px;
+  margin-top: 10px;
+  width: 90%;
+}
+
+.card-title, .card-text {
+  color: #ee0b0b;
+}
+
+.site-check-description {
+  color: #ffffff; /* Text color for contrast with the dark background */
+  font-size: 16px; /* Appropriate text size */
+  text-align: center; /* Text centering */
+  margin-bottom: 5px; /* Space between text lines */
+}
+
+.input-container {
+  background-color: #020f1d; /* Dark blue background for contrast */
+  padding: 20px; /* Prominent padding */
+  border-radius: 5px; /* Rounded borders */
+  width: 80%; /* Larger width for prominence */
+  margin-top: 150px; /* Distance from top to center vertically */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Stronger shadow for 3D effect */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content inside container */
+}
+
+#urlInput {
+  width: 100%; /* Full width */
+  margin-bottom: 10px; /* Space between input and button */
+}
+
+#verifyButton {
+  width: 100%; /* Full width to extend across the banner */
+  padding: 8px 0; /* Smaller padding to reduce height */
+  font-size: 14px; /* Smaller font size */
+  margin-top: 10px; /* Space above the button */
+}
