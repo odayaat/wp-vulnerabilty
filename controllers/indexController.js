@@ -28,6 +28,7 @@ exports.postUrl = async (req, res) => {
     "ValidSSLCertificate.py",
     "WAF.py",
     "WordPressVersionCheck.py",
+    "wp-admin.py",
     "xmlrpc.py",
   ];
 

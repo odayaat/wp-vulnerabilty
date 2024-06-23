@@ -2,6 +2,9 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+import sys
+
+url = sys.argv[1]
 
 result = {"title":" Wp Version Check  ","summary":"","recommendation":"","vulnerable":False}
 vulnerable = False
@@ -23,7 +26,7 @@ def get_wordpress_version(url):
         return f"Error: {e}"
 
 # Example usage:
-url = input("Enter the WordPress site URL: ")
+
 version = get_wordpress_version(url)
 result["summary"]+=f"WordPress version: {version}"
 

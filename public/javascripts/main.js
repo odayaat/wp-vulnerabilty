@@ -1,7 +1,7 @@
 
 const {jsPDF} = window.jspdf;
 
-const scriptsCount = 1;
+const scriptsCount = 16;
 const results = [];
 
 const urlInput = document.getElementById("urlInput");
