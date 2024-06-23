@@ -1,8 +1,12 @@
 import requests
 
 import sys
+import json
 
 url = sys.argv[1]
+
+result = {"title":"  Waf ","summary":"","recommendation":"","vulnerable":False}
+vulnerable = False
 
 payloads = [
     "' UNION SELECT 1",
@@ -26,16 +30,20 @@ for payload in payloads:
     elif response.status_code == 200:
         pass
     else:
-        print(
-            f"Unexpected response code: {response.status_code} for payload '{payload.encode("utf-8")}'."
-        )
+        result["summary"]+=f"Unexpected response code: {response.status_code} for payload '{payload.encode("utf-8")}'."
+        
 
 if len(blocked_payloads) == len(payloads):
-    print("WAF appears to be blocking all malicious payloads.")
+    result["summary"]="WAF appears to be blocking all malicious payloads."
+    
 
 if len(blocked_payloads) < len(payloads):
-    print("WAF vulnerabilities")
-    print("The following payloads were not blocked:")
+    result["summary"]="WAF vulnerabilities"
+    result["summary"]="The following payloads were not blocked:"
     for payload in payloads[len(blocked_payloads) :]:
-        print(payload.encode("utf-8")) 
+        result["summary"]+=f"encode for payload '{payload.encode("utf-8")}'."
+
+print(json.dumps(result))
+
+ 
         

@@ -1,7 +1,7 @@
 
 const {jsPDF} = window.jspdf;
 
-const scriptsCount = 12;
+const scriptsCount = 1;
 const results = [];
 
 const urlInput = document.getElementById("urlInput");
@@ -60,37 +60,8 @@ async function performSingleScan(e, script) {
   verifyButton.disabled = false;
 }
 
-// async function verifierUrl() {
-//   const url = urlInput.value.trim();
-//
-//   if (url === "") {
-//     alert("Veuillez entrer une URL valide");
-//     return;
-//   }
-//
-//   verifyButton.innerHTML = `<div class="spinner-border" role="status">
-//                             <span class="visually-hidden">Loading...</span>
-//                             </div>`;
-//
-//   verifyButton.disabled = true;
-//
-//   for (let i = 0; i < scriptsCount; i++) {
-//     const script = i;
-//
-//     try {
-//       const data = await executerScript(url, script);
-//       results.push(data);
-//       renderResult();
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   }
-//   verifyButton.innerHTML = `Vérifier`;
-//
-//   verifyButton.disabled = false;
-//   console.log(results);
-//   return results;
-// }
+
+
 
 async function verifierUrl() {
   const url = urlInput.value.trim();
@@ -121,9 +92,16 @@ function renderResult() {
   results.forEach((result) => {
     resultDiv.innerHTML += `
     <div class="card my-4"> 
-        <div class="card-body"> 
-            <h5 class="card-title">${result.message}</h5> 
-       
+        <div class="card-body ${result.vulnerable?'text-danger':'text-success'}"> 
+        <pre class="card-title">${result.title}</pre>
+        <pre class="card-title">${result.summary}</pre> 
+        <a  data-bs-toggle="collapse" href="#recommendation" role="button" aria-expanded="false" aria-controls="recommendation">
+      + 
+       </a>
+       <div class="collapse" id="recommendation">
+        <pre class="card-title">${result.recommendation}</pre> 
+        <pre class="card-title">${result.vulnerable}</pre> 
+       </div>
         </div> 
     </div>`;
   });
@@ -148,56 +126,51 @@ document.getElementById("verifyButton").addEventListener("click", function (e) {
 });
 
 
+
 async function generatePDF() {
   try {
-    const scriptList = [
-      "check_wp_admin.py",
-      "AccessiblePages.py",
-      "CORS.py",
-      "DirectoryListening.py",
-      "FindingUsers.py",
-      "GetPlugins.py",
-      "Getthemes.py",
-      "HeadersInfoDisclosure.py",
-      "MissingSecurityHeaders.py",
-      "PortScanner.py",
-      "WAF.py",
-      "WordPressVersionCheck.py",
-      "xmlrpc.py",
-    ];
-
-    const url = urlInput.value.trim();
-    if (url === "") {
-      alert("Veuillez entrer une URL valide");
-      return;
-    }
-
-    const results = [];
-
-    for (let i = 0; i < scriptList.length; i++) {
-      const response = await fetch("/verifier-url", {
-        method: "POST",
-        body: JSON.stringify({ url, script: i }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        results.push(data.message);
-      } else {
-        console.error("Failed to execute script", scriptList[i]);
-      }
-    }
-
-    // Create a new jsPDF instance
     const doc = new jsPDF();
 
-    // Add the results to the PDF
+    // Add cover page
+    doc.setFontSize(24);
+    doc.text("WORD PRESS VULNERABILITY SCAN REPORT", 20, 30);
+    doc.setFontSize(16);
+    doc.text("Confidential", 20, 50);
+    doc.text(`Scan URL: ${urlInput.value.trim()}`, 20, 60);
+    doc.text(`Scan Date: ${new Date().toLocaleDateString()}`, 20, 70);
+    doc.addPage();
+
+    // Add table of contents
+    doc.setFontSize(20);
+    doc.text("Table of Contents", 20, 20);
+    doc.setFontSize(12);
+    let y = 30;
     results.forEach((result, index) => {
-      doc.text(`Result of ${scriptList[index]}: ${result}`, 10, 10 + index * 10);
+      doc.text(`${index + 1}. ${result.script}`, 20, y);
+      y += 10;
     });
+    doc.addPage();
+
+    // Add results with titles and content
+    results.forEach((result, index) => {
+      if (index > 0) {
+        doc.addPage();
+      }
+      doc.setFontSize(18);
+      doc.text(result.script, 20, 20);
+      doc.setFontSize(12);
+      y = 30;
+      const lines = doc.splitTextToSize(result.message, 180);
+      doc.text(lines, 20, y);
+    });
+
+    // Add footer to each page
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.text(`Page ${i} of ${pageCount}`, 180, 290);
+    }
 
     // Save the PDF
     doc.save("report.pdf");
@@ -205,6 +178,7 @@ async function generatePDF() {
     console.error("Error generating PDF:", error);
   }
 }
+
 
 document.getElementById("pdfButton").addEventListener("click", function (e) {
   e.preventDefault();

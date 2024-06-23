@@ -1,6 +1,6 @@
 import sys
-
 import requests
+import json
 
 
 site = sys.argv[1]
@@ -18,6 +18,10 @@ urls_to_check = [
     ("/wp-sitemap-users-1.xml", "WP user sitemap"),
 ]
 
+result = {"title":" finding User ","summary":"","recommendation":"","vulnerable":False}
+vulnerable = False
+
+
 
 # Function to check if a URL is accessible and print the result
 def check_url(url, description):
@@ -25,13 +29,14 @@ def check_url(url, description):
     try:
         response = requests.get(full_url)
         if response.status_code == 200:
-            print(f"Found {description} at: {full_url}")
+            result["summary"]+=f"Found {description} at: {full_url}"
+            vulnerable=True
         elif response.status_code == 404:
             pass
         else:
-            print(f"Failed to check {description}. Status code: {response.status_code}")
+            result["summary"]+=f"Failed to check {description}. Status code: {response.status_code}"
     except requests.RequestException as e:
-        print(f"An error occurred while checking {description}: {e}")
+        result["summary"]-=f"An error occurred while checking {description}: {e}"
 
 
 # check if the request was successful (status code 200)
@@ -49,15 +54,18 @@ if response.status_code == 200:
             user_slug = user["slug"]
 
             # print the user details
-            print(f"User ID: {user_id}")
-            print(f"User Name: {user_name}")
-            print(f"User Slug: {user_slug}")
-            print()
+            result["summary"]+=f"User ID: {user_id}"
+            result["summary"]+=f"User Name: {user_name}"
+            result["summary"]+=f"User Slug: {user_slug}"   
+            result["summary"]=""
     else:
-        print("No users found.")
+        result["summary"]="No users found."
 else:
-    print(f"Failed to fetch users. Status code: {response.status_code}")
+    result["summary"]+=f"Failed to fetch users. Status code: {response.status_code}"
 
 # Loop through the URLs and check each one
 for url, description in urls_to_check:
     check_url(url, description)
+
+print(json.dumps(result))
+

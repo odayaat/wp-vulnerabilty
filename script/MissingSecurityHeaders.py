@@ -2,11 +2,13 @@ import sys
 
 # Import requests library
 import requests
+import json
 
 # Define the URL to check
 url = sys.argv[1]
 
-
+result = {"title":" Missing Security Headers  ","summary":"","recommendation":"","vulnerable":False}
+vulnerable = False
 # Define the security headers to look for
 security_headers = [
     "Strict-Transport-Security",
@@ -25,7 +27,7 @@ try:
     # Check the status code of the response
     if response.status_code == 200:
         # The URL is accessible
-        print("The URL is accessible")
+        result["summary"]="The URL is accessible"
 
         # Get the headers from the response
         headers = response.headers
@@ -42,18 +44,18 @@ try:
 
         # Check if there are any missing headers
         if missing_headers:
-            # Print the missing headers
-            print(
-                "The following security headers are missing:",
-                ", ".join(missing_headers),
-            )
+            result["summary"] = f"The following security headers are missing: {', '.join(missing_headers)}"
+            result["vulnerable"] = True
         else:
-            # All security headers are present
-            print("All security headers are present")
+            result["summary"] = "All security headers are present"
     else:
-        # The URL is not accessible
-        print("The URL is not accessible")
+        result["summary"] = "The URL is not accessible"
+        result["vulnerable"] = True
+        
 
 except Exception as e:
     # An error occurred
-    print("An error occurred:", e)
+    result["summary"]="An error occurred:", e
+
+print(json.dumps(result))
+

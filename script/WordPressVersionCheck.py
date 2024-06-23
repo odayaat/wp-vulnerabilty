@@ -1,8 +1,10 @@
 #https://leharshim.com/ vulnerable
 import requests
 from bs4 import BeautifulSoup
-import sys
+import json
 
+result = {"title":" Wp Version Check  ","summary":"","recommendation":"","vulnerable":False}
+vulnerable = False
 
 def get_wordpress_version(url):
     try:
@@ -21,9 +23,10 @@ def get_wordpress_version(url):
         return f"Error: {e}"
 
 # Example usage:
-url = sys.argv[1]
+url = input("Enter the WordPress site URL: ")
 version = get_wordpress_version(url)
-print(f"WordPress version: {version}")
+result["summary"]+=f"WordPress version: {version}"
+
 
 version = version.replace(".", "")
 
@@ -44,9 +47,9 @@ response = requests.get(url2, headers=headers)
 res = response.json()
 #print("Response:", res)
 if 'insecure' in str(res):
-    print("insecure Wordpress Version")
+    result["summary"]="insecure Wordpress Version"
+  
 else:
     pass
 
-
-
+print(json.dumps(result))

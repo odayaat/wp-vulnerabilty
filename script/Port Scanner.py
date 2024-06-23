@@ -1,6 +1,8 @@
 # This script runs on Python 3
 import socket, threading
 import sys
+from urllib.parse import urlparse
+
 
 
 def TCP_connect(ip, port_number, delay, output):
@@ -16,6 +18,8 @@ def TCP_connect(ip, port_number, delay, output):
 
 def scan_ports(host_ip, delay):
     isportopen = False
+    threads = []  # To run TCP_connect concurrently
+    output = {}  # For printing purposes
 
 
     threads = []  # To run TCP_connect concurrently
@@ -45,7 +49,9 @@ def scan_ports(host_ip, delay):
 
 
 def main():
-    host_ip = sys.argv[1]
+    input_url = sys.argv[1]
+    parsed_url = urlparse(input_url)
+    host_ip = parsed_url.hostname  # Extract the hostname (or IP)
     delay = 2
     scan_ports(host_ip, delay)
 

@@ -12,20 +12,22 @@ exports.postUrl = async (req, res) => {
   // const script = "check_wp_admin.py";
 
   const scriptList = [
-      "check_wp_admin.py",
-      "AccessiblePages.py",
-      "CORS.py",
-     "DirectoryListening.py",
-     "FindingUsers.py",
-      "GetPlugins.py",
-      "Getthemes.py",
-      "HeadersInfoDisclosure.py",
-       "MissingSecurityHeaders.py",
-     //  "URLcheck",
-    "Port Scanner.py",
-     "WAF.py",
-      "WordPressVersionCheck.py",
-     //"wp-admin",
+    "AccessiblePages.py",
+    "BruteForce.py",
+    "check_wp_admin.py",
+    "CORS.py",
+    "DirectoryListening.py",
+    "FindingUsers.py",
+    "GetPlugins.py",
+    "Getthemes.py",
+    "HeadersInfoDisclosure.py",
+    "MissingSecurityHeaders.py",
+   // "Port Scanner.py",
+    //"URLcheck",
+    "UserEnumeration.py",
+    "ValidSSLCertificate.py",
+    "WAF.py",
+    "WordPressVersionCheck.py",
     "xmlrpc.py",
   ];
 
@@ -38,11 +40,12 @@ exports.postUrl = async (req, res) => {
   };
 
   const result = await PythonShell.run(scriptList[script], options);
-  console.log(result);
+  
 
  
-
+   const jsonresult = JSON.parse(result[0]);
   //const resultObject = JSON.parse(result[0]);
 
-  res.status(200).json({ message: result[0] });
+  console.log(jsonresult);
+  res.status(200).json(jsonresult);
 };
