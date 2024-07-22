@@ -1,59 +1,57 @@
-# This script runs on Python 3
-import socket, threading
-import sys
+import json
+import socket
+import concurrent.futures
 from urllib.parse import urlparse
+import sys
 
+result = {
+    "title": "Port Scanning",
+    "summary": "",
+    "recommendation": "",
+    "vulnerable": False,
+}
 
 
 def TCP_connect(ip, port_number, delay, output):
-    TCPsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    TCPsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    TCPsock.settimeout(delay)
-    try:
-        TCPsock.connect((ip, port_number))
-        output[port_number] = "Listening"
-    except:
-        output[port_number] = ""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as TCPsock:
+        TCPsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        TCPsock.settimeout(delay)
+        try:
+            TCPsock.connect((ip, port_number))
+            output[port_number] = "Listening"
+        except:
+            output[port_number] = ""
 
 
 def scan_ports(host_ip, delay):
-    isportopen = False
-    threads = []  # To run TCP_connect concurrently
-    output = {}  # For printing purposes
+    output = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+        future_to_port = {
+            executor.submit(TCP_connect, host_ip, port, delay, output): port
+            for port in range(10000)
+        }
+        for future in concurrent.futures.as_completed(future_to_port):
+            port = future_to_port[future]
+            if output.get(port) == "Listening":
 
+                result["summary"] = f"{port}: Listening\n"
 
-    threads = []  # To run TCP_connect concurrently
-    output = {}  # For printing purposes
-
-    # Spawning threads to scan ports
-    for i in range(10000):
-        t = threading.Thread(target=TCP_connect, args=(host_ip, i, delay, output))
-        threads.append(t)
-
-    # Starting threads
-    for i in range(10000):
-        threads[i].start()
-
-    # Locking the main thread until all threads complete
-    for i in range(10000):
-        threads[i].join()
-
-    # Printing listening ports from small to large
-    for i in range(10000):
-        if output[i] == "Listening":
-            print(str(i) + ": " + output[i])
-            isportopen = True
-
-    if not isportopen :
-        print("no open port")
+                result["vulnerable"] = True
+                result["recommendation"] = "Vulnerability detected!"
 
 
 def main():
     input_url = sys.argv[1]
     parsed_url = urlparse(input_url)
-    host_ip = parsed_url.hostname  # Extract the hostname (or IP)
+    host_ip = parsed_url.hostname
     delay = 2
     scan_ports(host_ip, delay)
+
+    if not result["vulnerable"]:
+        result["summary"] = "No open ports detected"
+        result["recommendation"] = "No vulnerability detected"
+
+    print(json.dumps(result))
 
 
 if __name__ == "__main__":

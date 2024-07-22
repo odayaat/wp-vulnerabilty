@@ -12,7 +12,7 @@ exports.postUrl = async (req, res) => {
   // const script = "check_wp_admin.py";
 
   const scriptList = [
-    "AccessiblePages.py",
+    // "AccessiblePages.py",
     "BruteForce.py",
     "check_wp_admin.py",
     "CORS.py",
@@ -22,7 +22,7 @@ exports.postUrl = async (req, res) => {
     "Getthemes.py",
     "HeadersInfoDisclosure.py",
     "MissingSecurityHeaders.py",
-   // "Port Scanner.py",
+    //"Port Scanner.py",
     //"URLcheck",
     "UserEnumeration.py",
     "ValidSSLCertificate.py",
@@ -35,16 +35,16 @@ exports.postUrl = async (req, res) => {
   let options = {
     mode: "text",
     pythonPath: "C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+
+    // "",
     pythonOptions: ["-u"], // get print results in real-time
     scriptPath: "script",
     args: [url],
   };
 
   const result = await PythonShell.run(scriptList[script], options);
-  
 
- 
-   const jsonresult = JSON.parse(result[0]);
+  const jsonresult = JSON.parse(result[0]);
   //const resultObject = JSON.parse(result[0]);
 
   console.log(jsonresult);

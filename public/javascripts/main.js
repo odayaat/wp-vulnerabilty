@@ -1,13 +1,12 @@
+const { jsPDF } = window.jspdf;
 
-const {jsPDF} = window.jspdf;
-
-const scriptsCount = 16;
+const scriptsCount = 15;
 const results = [];
 
 const urlInput = document.getElementById("urlInput");
 
 const verifyButton = document.getElementById("verifyButton");
-//const pdfButton = document.getElementById("pdfButton");  // Ensure you have a button with this ID in your HTML
+const pdfButton = document.getElementById("pdfButton");
 
 async function executerScript(url, script) {
   try {
@@ -35,7 +34,7 @@ async function performSingleScan(e, script) {
   }
 
   e.target.innerHTML =
-      `<div class="spinner-border mb-2" role="status">
+    `<div class="spinner-border mb-2" role="status">
   <span class="visually-hidden">Loading...</span>
   </div>` + e.target.innerHTML;
 
@@ -60,9 +59,6 @@ async function performSingleScan(e, script) {
   verifyButton.disabled = false;
 }
 
-
-
-
 async function verifierUrl() {
   const url = urlInput.value.trim();
   if (url === "") {
@@ -74,11 +70,13 @@ async function verifierUrl() {
 
   for (let i = 0; i < scriptsCount; i++) {
     const data = await executerScript(url, i);
-    if(data === null){
+    if (data === null) {
       continue;
     }
     results.push(data);
     renderResult();
+
+    pdfButton.style.display = "block";
   }
 
   toggleLoading(false);
@@ -92,7 +90,9 @@ function renderResult() {
   results.forEach((result) => {
     resultDiv.innerHTML += `
     <div class="card my-4"> 
-        <div class="card-body ${result.vulnerable?'text-danger':'text-success'}"> 
+        <div class="card-body ${
+          result.vulnerable ? "text-danger" : "text-success"
+        }"> 
         <pre class="card-title">${result.title}</pre>
         <pre class="card-title">${result.summary}</pre> 
         <a  data-bs-toggle="collapse" href="#recommendation" role="button" aria-expanded="false" aria-controls="recommendation">
@@ -107,7 +107,6 @@ function renderResult() {
   });
 }
 
-
 function toggleLoading(isLoading) {
   if (isLoading) {
     verifyButton.innerHTML = `<div class="spinner-border" role="status">
@@ -115,7 +114,7 @@ function toggleLoading(isLoading) {
                               </div>`;
     verifyButton.disabled = true;
   } else {
-    verifyButton.innerHTML = 'Vérifier';
+    verifyButton.innerHTML = "Vérifier";
     verifyButton.disabled = false;
   }
 }
@@ -124,8 +123,6 @@ document.getElementById("verifyButton").addEventListener("click", function (e) {
   e.preventDefault();
   verifierUrl();
 });
-
-
 
 async function generatePDF() {
   try {
@@ -179,9 +176,112 @@ async function generatePDF() {
   }
 }
 
+function generatePDFNew() {
+  const doc = new jsPDF();
+
+  const tablesHtml = results
+    .map((result) => {
+      const headerColor = result.vulnerable ? "#ff0000" : "#00ff00";
+      return `
+      <table>
+        <thead style="background-color: ${headerColor};">
+          <tr>
+            <th colspan="2">${result.title}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Summary</td>
+            <td>${result.summary}</td>
+          </tr>
+          <tr>
+            <td>Vulnerable</td>
+            <td>${result.vulnerable || "None"}</td>
+          </tr>
+          <tr>
+            <td>Recommendations</td>
+            <td>${result.recommendation || "None"}</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+    })
+    .join("");
+  const docHtmlString = `
+  <head>
+
+ <style>
+ body{
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+ }
+  .table-container {
+    margin: 20px;
+    padding: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .vulnerable {
+    background-color: #ffcccc;
+  }
+  .safe {
+    background-color: #ccffcc;
+  }
+</style>
+  </head>
+
+    <body>
+      <h1>WORD PRESS VULNERABILITY SCAN REPORT</h1>
+      <p>Confidential</p>
+      <p>Scan URL: ${urlInput.value.trim()}</p>
+      <p>Scan Date: ${new Date().toLocaleDateString()}</p>
+      <h2>Table of Contents</h2>
+      <ul>
+        ${results
+          .map((result, index) => {
+            return `<li>${index + 1}. ${result.title}</li>`;
+          })
+          .join("")}
+      </ul>
+      <br>
+     <body>
+
+      <div id="report-container" class="table-container">
+        ${tablesHtml}
+      </div>
+
+    </body>
+  `;
+
+  const docElement = document.createElement("html");
+  docElement.innerHTML = docHtmlString;
+
+  doc.html(docElement, {
+    callback: function (doc) {
+      // Save the PDF
+      doc.save("document-html.pdf");
+    },
+    margin: [3, 3, 3, 3],
+    autoPaging: "text",
+    x: 0,
+    y: 0,
+    width: 190, //target width in the PDF document
+    windowWidth: 675, //window width in CSS pixels
+  });
+}
 
 document.getElementById("pdfButton").addEventListener("click", function (e) {
   e.preventDefault();
-  generatePDF();
+  generatePDFNew();
 });
-
